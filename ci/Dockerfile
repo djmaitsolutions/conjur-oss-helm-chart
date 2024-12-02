@@ -8,7 +8,8 @@ WORKDIR /src
 
 # Install Docker client
 RUN apt-get update && \
-    apt-get install -y apt-transport-https \
+    apt-get install -y --no-install-recommends \
+                       apt-transport-https \
                        ca-certificates \
                        curl \
                        gnupg2 \
@@ -20,7 +21,7 @@ RUN apt-get update && \
     apt-key add /tmp/docker_repo_key && \
     add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$distro $release stable" && \
     apt-get update && \
-    apt-get install -y docker-ce && \
+    apt-get install -y --no-install-recommends docker-ce && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
