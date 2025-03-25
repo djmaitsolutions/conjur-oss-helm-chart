@@ -1,4 +1,5 @@
 conjur-oss-*.tgz
+*.bak
 
 conjur-oss/charts/*.tgz
 output/
