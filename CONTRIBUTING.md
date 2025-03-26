@@ -11,30 +11,31 @@ Majority of the instructions on how to build, develop, and run the code in
 this repo is located in the main [README.md](README.md) but this file adds
 any additional information for contributing code to this project.
 
-## Releasing
+## Releases
 
-### Upgrading Conjur version
+Releases should be created by maintainers only. To create and promote a release, follow the instructions in this section.
 
-To upgrade the default Conjur version used by this chart, you will need to
-update the following files:
-- Update the [README](./conjur-oss/README.md) to change the default value for
-  `image.tag` in the [Configuration table](./conjur-oss/README.md#configuration)
-- Update the `tag` value for the `cyberark/conjur` image in
-  [conjur-oss/values.yaml](./conjur-oss/values.yaml)
+### Update the changelog
 
-### Creating a new release
+**NOTE:** If the Changelog is already up-to-date, skip this
+step and promote the desired release build from the main branch.
 
-To release a new version of this chart:
-- Make the appropriate changes
-- Update the version number in [`conjur-oss/Chart.yaml`](conjur-oss/Chart.yaml)
-- Update the CHANGELOG.md file according to the
-  [Conjur community guidelines](https://github.com/cyberark/community/blob/master/Conjur/CONTRIBUTING.md#tagging)
-- Tag the git history with `v##.##.##` version
-- Create the release on GitHub for that tag
-- Get the helm chart package from the [package action](https://github.com/cyberark/conjur-oss-helm-chart/actions/workflows/package.yml) - the
-  `conjur-oss-VERSION.tgz` tarball is in the `package.zip`
-- Upload the tarball to the GitHub release
-- Add the chart to our [Helm charts repo](https://github.com/cyberark/helm-charts)
+1. Create a new branch for the version bump.
+1. Based on the changelog content, determine the new version number and update.
+1. Review the git log and ensure the [changelog](CHANGELOG.md) contains all
+   relevant recent changes with references to GitHub issues or PRs, if possible.
+1. Commit these changes - `Bump version to x.y.z` is an acceptable commit
+   message - and open a PR for review.
+
+### Release and Promote
+
+1. Merging into the main branch will automatically trigger a release build.
+   If successful, this release can be promoted at a later time.
+1. Jenkins build parameters can be utilized to promote a successful release
+   or manually trigger aditional releases as needed.
+1. Reference the [internal automated release doc](https://github.com/conjurinc/docs/blob/master/reference/infrastructure/automated_releases.md#release-and-promotion-process)
+for releasing and promoting.
+1. **After promotion add the chart to our public [Helm charts repo](https://github.com/cyberark/helm-charts)**
 
 ## Contributing
 

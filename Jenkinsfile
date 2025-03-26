@@ -1,9 +1,27 @@
 #!/usr/bin/env groovy
+@Library(['product-pipelines-shared-library', 'conjur-enterprise-sharedlib']) _
 
-import groovy.transform.Field
+// Automated release, promotion and dependencies
+properties([
+  // Include the automated release parameters for the build
+  release.addParams(),
+  // Dependencies of the project that should trigger builds
+  dependencies([])
+])
 
-@Field
-def TAG = ""
+// Performs release promotion.  No other stages will be run
+if (params.MODE == "PROMOTE") {
+  release.promote(params.VERSION_TO_PROMOTE) { infrapool, sourceVersion, targetVersion, assetDirectory ->
+    // Any assets from sourceVersion Github release are available in assetDirectory
+    // Any version number updates from sourceVersion to targetVersion occur here
+    // Any publishing of targetVersion artifacts occur here
+    // Anything added to assetDirectory will be attached to the Github Release
+
+    //Note: assetDirectory is on the infrapool agent, not the local Jenkins agent.
+  }
+  release.copyEnterpriseRelease(params.VERSION_TO_PROMOTE)
+  return
+}
 
 pipeline {
   agent { label 'conjur-enterprise-common-agent' }
@@ -13,8 +31,14 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '30'))
   }
 
+  environment {
+    // Sets the MODE to the specified or autocalculated value as appropriate
+    MODE = release.canonicalizeMode()
+  }
+
   triggers {
     cron(getDailyCronString())
+    parameterizedCron(getWeeklyCronString("H(1-5)","%MODE=RELEASE"))
   }
 
   stages {
@@ -29,14 +53,25 @@ pipeline {
     stage('Get InfraPool Agent') {
       steps {
         script {
-          INFRAPOOL_EXECUTORV2_AGENT_0 = getInfraPoolAgent.connected(type: "ExecutorV2", quantity: 1, duration: 1)[0]
+          infrapool = getInfraPoolAgent.connected(type: "ExecutorV2", quantity: 1, duration: 1)[0]
         }
       }
     }
 
-    stage('Changelog') {
+    // Generates a VERSION file based on the current build number and latest version in CHANGELOG.md
+    stage('Validate Changelog and set version') {
       steps {
-        parseChangelog(INFRAPOOL_EXECUTORV2_AGENT_0)
+        script {
+          updateVersion(infrapool, "CHANGELOG.md", "${BUILD_NUMBER}")
+        }
+      }
+    }
+
+    stage('Build package') {
+      steps {
+        script {
+          infrapool.agentSh 'ci/package.sh'
+        }
       }
     }
 
@@ -46,15 +81,42 @@ pipeline {
       }
       steps {
         script {
-          INFRAPOOL_EXECUTORV2_AGENT_0.agentSh 'cd ci && summon ./jenkins_build.sh'
+          infrapool.agentSh 'cd ci && summon ./jenkins_build.sh'
+        }
+      }
+    }
+
+    stage('Release') {
+      when {
+        expression {
+          MODE == "RELEASE"
+        }
+      }
+      steps {
+        script {
+          release(infrapool, { billOfMaterialsDirectory, assetDirectory ->
+            /* Publish release artifacts to all the appropriate locations
+               Copy any artifacts to assetDirectory on the infrapool node
+               to attach them to the Github release.
+
+               If your assets are on the infrapool node in the target
+               directory, use a copy like this:
+                  infrapool.agentSh "cp target/* ${assetDirectory}"
+               Note That this will fail if there are no assets, add :||
+               if you want the release to succeed with no assets.
+
+               If your assets are in target on the main Jenkins agent, use:
+                 infrapool.agentPut(from: 'target/', to: assetDirectory)
+            */
+            infrapool.agentSh "cp package/conjur-oss-*.tgz ${assetDirectory}"
+          })
         }
       }
     }
   }
-
   post {
     always {
-      releaseInfraPoolAgent(".infrapool/release_agents")
+      releaseInfraPoolAgent()
     }
   }
 }
