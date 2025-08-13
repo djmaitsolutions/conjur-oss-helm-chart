@@ -1,0 +1,13 @@
+{{- if .Values.exportAPIkey.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-export-api-key-configmap
+  namespace: {{ .Release.Namespace }}
+  labels:
+    chart: {{ template "conjur-oss.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  export.sh: {{ tpl (.Files.Get "files/export.sh") . | quote }}
+{{- end -}}

@@ -42,6 +42,11 @@ rules:
 - apiGroups: [""]
   resources: ["pods/exec"]
   verbs: ["create", "get"]
+{{- if .Values.exportAPIkey.enabled }}  
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["create", "delete", "update", "get", "list"]
+{{- end }}  
 ---
 kind: ClusterRoleBinding
 apiVersion: {{ include "conjur-oss.rbac-api" . }}

@@ -250,6 +250,19 @@
           "type": "boolean"
         }
       }
-    }
+    },
+    "exportAPIkey": {
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "secretName": {
+          "type": "string"
+        },
+        "ttl": {
+          "type": "string"
+        }
+      }
+    }    
   }
 }
