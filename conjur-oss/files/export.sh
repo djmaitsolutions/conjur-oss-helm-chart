@@ -9,7 +9,7 @@ done
 echo "Sidecar: Main application HTTP endpoint is ready!"
 
 TOKEN_EXPIRATION=$(date -d "now + {{ .Values.exportAPIkey.ttl }}" +%s)
-TOKEN_VALUE=$(echo "{\"account\":\"conjur\", \"sub\":\"admin\", \"exp\":$TOKEN_EXPIRATION}" | socat - UNIX-CONNECT:"/run/authn-local/.socket")
+TOKEN_VALUE=$(echo "{\"account\":\"${CONJUR_ACCOUNT}\", \"sub\":\"admin\", \"exp\":$TOKEN_EXPIRATION}" | socat - UNIX-CONNECT:"/run/authn-local/.socket")
 echo "Sidecar: Generated Conjur token value"
 
 echo "Sidecar: Proceeding to create Kubernetes Secret using curl..."
@@ -25,7 +25,7 @@ KUBERNETES_SERVICE_PORT=$KUBERNETES_SERVICE_PORT # Injected by Kubernetes
 API_SERVER_URL="https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}"
 SECRETS_API_PATH="/api/v1/namespaces/${NAMESPACE}/secrets"
 
-SECRET_NAME="conjur-oss-conjur-admin-token"
+SECRET_NAME="{{ .Values.exportAPIkey.secretName }}"
 SECRET_KEY="token.json"
 
 # Base64 encode the secret value

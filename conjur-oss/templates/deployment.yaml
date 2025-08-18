@@ -185,6 +185,9 @@ spec:
           - |
             apk add --no-cache socat
             /scripts/export.sh
+        env:
+        - name: CONJUR_ACCOUNT
+          value: {{ .Values.account.name }}        
         volumeMounts:
         - name: {{ .Release.Name }}-authn-local-socket-volume
           mountPath: /run/authn-local
