@@ -15,6 +15,7 @@ metadata:
     "helm.sh/hook-delete-policy": before-hook-creation
 {{ end }}
 spec:
+  serviceAccountName: {{ template "conjur-oss.service-account" . }}
   initContainers:
   - name: {{ .Release.Name }}-bats-init
     image: bats/bats:v1.1

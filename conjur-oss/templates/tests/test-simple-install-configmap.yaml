@@ -7,3 +7,9 @@ data:
     @test "Testing that Conjur status page is up" {
       curl -f --cacert /cacert/tls.crt https://{{ template "conjur-oss.fullname" . }}/ | grep 'Status'
     }
+  {{- if .Values.exportAPIkey.enabled }}
+    @test "Testing that the Secret containing a Conjur authentication token has been created" {
+      result=$(curl --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" "https://${KUBERNETES_SERVICE_HOST}:${KUBERNETES_SERVICE_PORT}/api/v1/namespaces/$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)/secrets/{{ .Values.exportAPIkey.secretName }}" --output /dev/null --silent --write-out "%{http_code}")
+      [ "$result" -eq 200 ]
+    }
+  {{- end }}
