@@ -6,7 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
-## [2.0.8] - 2025-03-25
+## [2.1.0] - 2025-08-28
+
+### Added
+
+- The Conjur OSS Helm chart has been extended to optionally generate a short-lived authentication token (stored in a Kubernetes Secret) for the admin account
 
 ## [2.0.7] - 2023-08-30
 
@@ -173,7 +177,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - First version of chart available.
 
-[Unreleased]: https://github.com/cyberark/conjur-oss-helm-chart/compare/v2.0.7...HEAD
+[2.1.0]: https://github.com/cyberark/conjur-oss-helm-chart/compare/v2.0.7...v2.1.0
 [2.0.7]: https://github.com/cyberark/conjur-oss-helm-chart/compare/v2.0.6...v2.0.7
 [2.0.6]: https://github.com/cyberark/conjur-oss-helm-chart/compare/v2.0.5...v2.0.6
 [2.0.5]: https://github.com/cyberark/conjur-oss-helm-chart/compare/v2.0.4...v2.0.5

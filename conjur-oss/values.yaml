@@ -188,3 +188,15 @@ tolerations: []
 # Set enabled true for OCP support
 openshift: 
   enabled: false
+
+# Set enabled to true to enable the Export API key feature.
+# This feature allows the Conjur server to export the API key for a given
+# Conjur user to a Kubernetes secret.
+exportAPIkey:
+  enabled: false # If true, ensure account.create is also true.
+  secretName: "conjur-oss-conjur-admin-token"
+  ttl: "10 minutes"
+  image:
+    repository: registry.gitlab.com/gitlab-ci-utils/curl-jq
+    tag: "3.2.1"
+    pullPolicy: Always

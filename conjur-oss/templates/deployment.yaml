@@ -55,6 +55,14 @@ spec:
             - key: conjur_site
               path: sites-enabled/conjur.conf
       {{- end }}
+      {{- if .Values.exportAPIkey.enabled }}
+      - name: {{ .Release.Name }}-authn-local-socket-volume
+        emptyDir: {}
+      - name: {{ .Release.Name }}-export-api-key-configmap-volume
+        configMap:
+          name: {{ .Release.Name }}-export-api-key-configmap
+          defaultMode: 0500
+      {{- end }}      
       containers:
       - name: {{ .Release.Name }}-nginx
         image: "{{ .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}"
@@ -160,8 +168,33 @@ spec:
           value: {{ .Values.account.name }}
         - name: CONJUR_LOG_LEVEL
           value: {{ .Values.logLevel }}
+        {{- if .Values.exportAPIkey.enabled }}
+        volumeMounts:
+        - name: {{ .Release.Name }}-authn-local-socket-volume
+          mountPath: /run/authn-local
+          readOnly: false
+        {{- end }}          
         resources:
 {{ toYaml .Values.resources | indent 12 }}
+      {{- if .Values.exportAPIkey.enabled }}
+      - name: {{ .Release.Name }}-export-api-key
+        image: "{{ .Values.exportAPIkey.image.repository }}:{{ .Values.exportAPIkey.image.tag }}"
+        imagePullPolicy: {{ .Values.exportAPIkey.image.pullPolicy }}
+        command: [ "/bin/bash", "-c" ]
+        args:
+          - |
+            apk add --no-cache socat
+            /scripts/export.sh
+        env:
+        - name: CONJUR_ACCOUNT
+          value: {{ .Values.account.name }}        
+        volumeMounts:
+        - name: {{ .Release.Name }}-authn-local-socket-volume
+          mountPath: /run/authn-local
+          readOnly: false
+        - name: {{ .Release.Name }}-export-api-key-configmap-volume
+          mountPath: "/scripts"
+      {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
