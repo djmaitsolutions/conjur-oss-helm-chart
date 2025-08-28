@@ -193,7 +193,7 @@ openshift:
 # This feature allows the Conjur server to export the API key for a given
 # Conjur user to a Kubernetes secret.
 exportAPIkey:
-  enabled: false
+  enabled: false # If true, ensure account.create is also true.
   secretName: "conjur-oss-conjur-admin-token"
   ttl: "10 minutes"
   image:

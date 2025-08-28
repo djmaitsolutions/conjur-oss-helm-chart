@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## Unreleased
 
+## [2.1.0] - 2025-08-28
+
+### Added
+
+- The Conjur OSS Helm chart has been extended to generate a short-lived authentication token (stored in a Kubernetes Secret) for the admin account
+
 ## [2.0.8] - 2025-03-25
 
 ## [2.0.7] - 2023-08-30

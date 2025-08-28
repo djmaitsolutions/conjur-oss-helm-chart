@@ -22,6 +22,7 @@ Conjur Open Source is part of the CyberArk Privileged Access Security Solution w
     + [Example: Installation Using Command Line Arguments](#example-installation-using-command-line-arguments)
     + [Example: Installation Using Custom YAML File](#example-installation-using-custom-yaml-file)
   * [Configuring Conjur Accounts](#configuring-conjur-accounts)
+    + [Accessing account credentials via a Kubernetes Secret](#accessing-account-credentials-via-a-kubernetes-secret)
   * [Installing Conjur with an External Postgres Database](#installing-conjur-with-an-external-postgres-database)
   * [Auto-Generated Configuration](#auto-generated-configuration)
 - [Upgrading, Modifying, or Migrating a Conjur Open Source Helm Deployment](#upgrading-modifying-or-migrating-a-conjur-open-source-helm-deployment)
@@ -263,7 +264,9 @@ Store these in a safe location.
 
 #### Accessing account credentials via a Kubernetes Secret
 
-This chart includes the ability to automatically generate a short-lived token that can be used to programmatically authenticate to the Conjur service. The token is stored as a json file (token.json) in a Secret (`conjur-oss-conjur-admin-token`) in the same namespace as the Conjur service. The main use-case for this feature is to enable full automation of bootstrapping Conjur with initial policies, i.e. ones that provide further authenticators and hosts. For example, Conjur's Go SDK provides a method `NewClientFromTokenFile` which accepts the token.json file.
+This chart includes the ability to automatically generate a short-lived token that can be used to programmatically authenticate to the Conjur service. The token is stored as a json file (token.json) in a Secret (`conjur-oss-conjur-admin-token`) in the same namespace as the Conjur service. The main use-case for this feature is to enable full automation of bootstrapping Conjur with initial policies, i.e. ones that provide further authenticators and hosts. For example, Conjur's Go SDK provides a method `NewClientFromTokenFile` which accepts the token.json file.  
+
+_**NOTE:**_ Be aware that this token is for the admin account created when the Conjur service first starts and, thus, has full privileges over the service. It is intended to enable the Conjur service to be bootstrapped with further, less privileged authenticators and hosts. With this in mind the token, by default, expires 10 minutes after being created. Although this value can be increased we recommend that you do not.
 
 ### Installing Conjur with an External Postgres Database
 
@@ -403,7 +406,7 @@ The following table lists the configurable parameters of the Conjur Open Source 
 |`ssl.expiration`|Expiration limit for generated certificates|`365`|
 |`ssl.hostname`|Hostname and Common Name for generated certificate and ingress|`"conjur.myorg.com"`|
 |`postgresLabels`|Extra Kubernetes labels to apply to Conjur PostgreSQL resources|`{}`|
-|`exportAPIkey.enabled`|Controls whether a json authentication token should be created for the Conjur account specified in `account.name` and stored in a Kubernetes Secret|`false`|
+|`exportAPIkey.enabled`|Controls whether a json authentication token should be created for the Conjur account specified in `account.name` and stored in a Kubernetes Secret. _**NOTE:**_ if you set this value to true you must also set `account.create` to `true`|`false`|
 |`exportAPIkey.secretName`|Name of the Secret to store the authentication token (in a file called token.json)|`"conjur-oss-conjur-admin-token"`|
 |`exportAPIkey.ttl`|How long the token will remain valid (use a valid `date -d` value, e.g. 15 minutes, 1 day)|"10 minutes"|
 |`exportAPIkey.image.repository`|Image used for the container which executes the script [export.sh](./files/export.sh) to generate the token|`registry.gitlab.com/gitlab-ci-utils/curl-jq`|
