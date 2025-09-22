@@ -1,0 +1,19 @@
+should match snapshot of default values:
+  1: |
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      labels:
+        app: conjur-oss-postgres
+        app.kubernetes.io/component: postgres
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-oss-pvc
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 8Gi

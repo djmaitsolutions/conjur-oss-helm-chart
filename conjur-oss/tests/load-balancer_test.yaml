@@ -1,0 +1,18 @@
+suite: Test Load Balancer
+templates:
+  - "load-balancer.yaml"
+tests:
+  - it: should match snapshot of default values
+    set:
+      dataKey: "1234567890"
+    asserts:
+      - matchSnapshot: {}
+  - it: should not create any service if 'service.external.enabled' is false
+    set:
+      dataKey: "1234567890"
+      service:
+        external:
+          enabled: false      
+    asserts:
+      - notExists:
+          path: metadata.name

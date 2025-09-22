@@ -1,0 +1,19 @@
+suite: Test Postgres SSL ConfigMap when Openshift enabled
+templates:
+  - "postgres-ocp-ssl-configmap.yaml"
+tests:
+  - it: should match snapshot of default values
+    set:
+      dataKey: "1234567890"
+      openshift:
+        enabled: true
+    asserts:
+      - matchSnapshot: {}
+  - it: should not create the ConfigMap if 'openshift.enabled' is false
+    set:
+      dataKey: "1234567890"
+      openshift:
+        enabled: false
+    asserts:
+      - notExists:
+          path: metadata.name      

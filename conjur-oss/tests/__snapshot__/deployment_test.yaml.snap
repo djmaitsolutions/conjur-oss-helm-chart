@@ -1,0 +1,461 @@
+should match snapshot of default values:
+  1: |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      labels:
+        app: conjur-oss
+        app.kubernetes.io/component: service
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-oss
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: conjur-oss
+          app.kubernetes.io/component: service
+          app.kubernetes.io/name: RELEASE-NAME
+          chart: conjur-oss-0.0.0-dev
+          heritage: Helm
+          release: RELEASE-NAME
+      template:
+        metadata:
+          annotations:
+            checksum/nginx-configmap: 35bfb35831a42b76cd1f29b946357ca537bba44eebb040ffc98f1742e25d237f
+            checksum/secrets: 925d0f84d9884b70c7e952ae8d439e12bdb2ee6292adc0d2b273ec99360b2c97
+            checksum/ssl-cert: c5dcbdd9a8eb3f6f1e32f6d9f307a0ca6ef8161a33d0f41a3cc607fcfb40a5ad
+          labels:
+            app: conjur-oss
+            app.kubernetes.io/component: service
+            app.kubernetes.io/name: RELEASE-NAME
+            chart: conjur-oss-0.0.0-dev
+            heritage: Helm
+            release: RELEASE-NAME
+        spec:
+          containers:
+            - image: nginx:1.15
+              imagePullPolicy: Always
+              livenessProbe:
+                failureThreshold: 180
+                httpGet:
+                  path: /status
+                  port: https
+                  scheme: HTTPS
+                initialDelaySeconds: 1
+                periodSeconds: 5
+                timeoutSeconds: 3
+              name: RELEASE-NAME-nginx
+              ports:
+                - containerPort: 9443
+                  name: https
+                - containerPort: 9000
+                  name: http
+              readinessProbe:
+                failureThreshold: 180
+                httpGet:
+                  path: /status
+                  port: https
+                  scheme: HTTPS
+                initialDelaySeconds: 1
+                periodSeconds: 5
+                timeoutSeconds: 3
+              volumeMounts:
+                - mountPath: /opt/conjur/etc/ssl/cert
+                  name: RELEASE-NAME-conjur-ssl-cert-volume
+                  readOnly: true
+                - mountPath: /opt/conjur/etc/ssl/ca
+                  name: RELEASE-NAME-conjur-ssl-ca-cert-volume
+                  readOnly: true
+                - mountPath: /etc/nginx
+                  name: RELEASE-NAME-conjur-configmap-volume
+                  readOnly: true
+            - args:
+                - server
+              env:
+                - name: PORT
+                  value: "8080"
+                - name: CONJUR_AUTHENTICATORS
+                  valueFrom:
+                    secretKeyRef:
+                      key: key
+                      name: RELEASE-NAME-conjur-authenticators
+                - name: CONJUR_DATA_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      key: key
+                      name: RELEASE-NAME-conjur-data-key
+                - name: DATABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      key: key
+                      name: RELEASE-NAME-conjur-database-url
+                - name: CONJUR_ACCOUNT
+                  value: default
+                - name: CONJUR_LOG_LEVEL
+                  value: info
+              image: cyberark/conjur:latest
+              imagePullPolicy: Always
+              livenessProbe:
+                failureThreshold: 180
+                httpGet:
+                  path: /
+                  port: http
+                initialDelaySeconds: 1
+                periodSeconds: 5
+                timeoutSeconds: 2
+              name: conjur-oss
+              ports:
+                - containerPort: 8080
+                  name: http
+                  protocol: TCP
+              readinessProbe:
+                failureThreshold: 180
+                httpGet:
+                  path: /
+                  port: http
+                initialDelaySeconds: 1
+                periodSeconds: 30
+                timeoutSeconds: 30
+          serviceAccountName: RELEASE-NAME-conjur-oss
+          volumes:
+            - name: RELEASE-NAME-conjur-ssl-cert-volume
+              secret:
+                defaultMode: 256
+                secretName: RELEASE-NAME-conjur-ssl-cert
+            - name: RELEASE-NAME-conjur-ssl-ca-cert-volume
+              secret:
+                defaultMode: 256
+                secretName: RELEASE-NAME-conjur-ssl-ca-cert
+            - configMap:
+                items:
+                  - key: nginx_conf
+                    path: nginx.conf
+                  - key: mime_types
+                    path: mime.types
+                  - key: dhparams
+                    path: dhparams.pem
+                  - key: conjur_site
+                    path: sites-enabled/conjur.conf
+                name: RELEASE-NAME-conjur-nginx-configmap
+              name: RELEASE-NAME-conjur-configmap-volume
+  2: |
+    apiVersion: v1
+    data:
+      conjur_site: |
+        server {
+          ssl_certificate /opt/conjur/etc/ssl/cert/tls.crt;
+          ssl_certificate_key /opt/conjur/etc/ssl/cert/tls.key;
+
+          ssl_client_certificate /opt/conjur/etc/ssl/ca/tls.crt;
+
+          ssl_verify_client optional_no_ca;
+
+          listen 9443 ssl;
+          listen [::]:9443 ssl;
+
+          proxy_set_header Conjur-Forwarded-Host $http_host;
+          proxy_set_header X-Forwarded-Proto $scheme;
+          proxy_set_header X-Real_IP $remote_Addr;
+          proxy_set_header X-Forwarded_For $proxy_add_x_forwarded_for;
+          proxy_set_header X-SSL-Client-Certificate $ssl_client_escaped_cert;
+
+          # Container health status
+          location /status {
+            access_log off;
+            return 200 'OK';
+          }
+
+          location / {
+            proxy_pass http://127.0.0.1:8080;
+          }
+        }
+
+        server {
+          # redirect outside unencrypted access to https
+          listen 9000;
+          listen [::]:9000;
+          return 301 https://$host$request_uri;
+        }
+      dhparams: |
+        -----BEGIN DH PARAMETERS-----
+        MIIBCAKCAQEAhg2rRNwhgO8Nxc363bnKNKxb7xP8BXdQBnEHNxtqfpPRQViiP8K9
+        fMHHvN5/QAeB0hCOEg6dhbYurOcT9ZfFy9BSC9QFTixfDmMHe9MT1VIYqvsXVyjO
+        l/ivdCW0/eMZ5sc1Fcleym+TQzzrgnI0Kad17tmq4tvBKky+0YY4Q/M9BupZ7omc
+        fyqhY+LyEqIjWuCd3eE7YQIonOrXJ+8xuOjl5uilFu4Zz+i4KeELmAG1WaOjvg+Z
+        dJcve9soB3uaJW45jS/7cRl94VPJsfCJC/Z6E2R6CSPDgvytxL8aAM5FCyMQljN3
+        vS9xNgsWz5gZqU3gbxW2dRgedjEvW5VHMwIBAg==
+        -----END DH PARAMETERS-----
+      mime_types: |
+        types {
+          text/html                                        html htm shtml;
+          text/css                                         css;
+          text/xml                                         xml;
+          image/gif                                        gif;
+          image/jpeg                                       jpeg jpg;
+          application/javascript                           js;
+          application/atom+xml                             atom;
+          application/rss+xml                              rss;
+
+          text/mathml                                      mml;
+          text/plain                                       txt;
+          text/vnd.sun.j2me.app-descriptor                 jad;
+          text/vnd.wap.wml                                 wml;
+          text/x-component                                 htc;
+
+          image/png                                        png;
+          image/svg+xml                                    svg svgz;
+          image/tiff                                       tif tiff;
+          image/vnd.wap.wbmp                               wbmp;
+          image/webp                                       webp;
+          image/x-icon                                     ico;
+          image/x-jng                                      jng;
+          image/x-ms-bmp                                   bmp;
+
+          font/woff                                        woff;
+          font/woff2                                       woff2;
+
+          application/java-archive                         jar war ear;
+          application/json                                 json;
+          application/mac-binhex40                         hqx;
+          application/msword                               doc;
+          application/pdf                                  pdf;
+          application/postscript                           ps eps ai;
+          application/rtf                                  rtf;
+          application/vnd.apple.mpegurl                    m3u8;
+          application/vnd.google-earth.kml+xml             kml;
+          application/vnd.google-earth.kmz                 kmz;
+          application/vnd.ms-excel                         xls;
+          application/vnd.ms-fontobject                    eot;
+          application/vnd.ms-powerpoint                    ppt;
+          application/vnd.oasis.opendocument.graphics      odg;
+          application/vnd.oasis.opendocument.presentation  odp;
+          application/vnd.oasis.opendocument.spreadsheet   ods;
+          application/vnd.oasis.opendocument.text          odt;
+          application/vnd.openxmlformats-officedocument.presentationml.presentation
+                                                           pptx;
+          application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+                                                           xlsx;
+          application/vnd.openxmlformats-officedocument.wordprocessingml.document
+                                                           docx;
+          application/vnd.wap.wmlc                         wmlc;
+          application/x-7z-compressed                      7z;
+          application/x-cocoa                              cco;
+          application/x-java-archive-diff                  jardiff;
+          application/x-java-jnlp-file                     jnlp;
+          application/x-makeself                           run;
+          application/x-perl                               pl pm;
+          application/x-pilot                              prc pdb;
+          application/x-rar-compressed                     rar;
+          application/x-redhat-package-manager             rpm;
+          application/x-sea                                sea;
+          application/x-shockwave-flash                    swf;
+          application/x-stuffit                            sit;
+          application/x-tcl                                tcl tk;
+          application/x-x509-ca-cert                       der pem crt;
+          application/x-xpinstall                          xpi;
+          application/xhtml+xml                            xhtml;
+          application/xspf+xml                             xspf;
+          application/zip                                  zip;
+
+          application/octet-stream                         bin exe dll;
+          application/octet-stream                         deb;
+          application/octet-stream                         dmg;
+          application/octet-stream                         iso img;
+          application/octet-stream                         msi msp msm;
+
+          audio/midi                                       mid midi kar;
+          audio/mpeg                                       mp3;
+          audio/ogg                                        ogg;
+          audio/x-m4a                                      m4a;
+          audio/x-realaudio                                ra;
+
+          video/3gpp                                       3gpp 3gp;
+          video/mp2t                                       ts;
+          video/mp4                                        mp4;
+          video/mpeg                                       mpeg mpg;
+          video/quicktime                                  mov;
+          video/webm                                       webm;
+          video/x-flv                                      flv;
+          video/x-m4v                                      m4v;
+          video/x-mng                                      mng;
+          video/x-ms-asf                                   asx asf;
+          video/x-ms-wmv                                   wmv;
+          video/x-msvideo                                  avi;
+        }
+      nginx_conf: |
+        worker_processes auto;
+        pid /var/run/nginx.pid;
+
+        events {
+            worker_connections 768;
+        }
+
+        http {
+            server_tokens off;
+            include       mime.types;
+            default_type  application/octet-stream;
+
+            sendfile        on;
+            keepalive_timeout  65;
+            client_max_body_size 10M;
+            proxy_read_timeout 600s;
+
+            # Prevent DoS attacks
+            reset_timedout_connection on;
+
+            # Speed up SSL connections
+            ssl_session_timeout 10m;
+            ssl_session_cache   shared:SSL:10m;
+
+            # Custom security-minded SSL settings
+            ssl_dhparam /etc/nginx/dhparams.pem;
+            ssl_protocols TLSv1.3 TLSv1.2;
+            ssl_prefer_server_ciphers on;
+            ssl_ciphers 'ALL:!RSA:!SHA:!aNULL:!eNULL:!EXPORT:!MEDIUM:!LOW:!CAMELLIA:!3DES:!DES:!MD5:!PSK:!RC4:!DSS:!SRP:!DSS:!SEED:!SSLv3:!SSLv2:!IDEA:!aGOST';
+
+            log_format syslog '$http_host '
+                              '$remote_addr '
+                              '"$request" $status $body_bytes_sent '
+                              '"$http_referer" "$http_user_agent" '
+                              '$request_time '
+                              '$upstream_response_time';
+
+            access_log /var/log/nginx/access.log syslog;
+
+            # Don't ever retry failed requests. In spite of the name, this
+            # prevents retries even if there's only a single upstream.
+            proxy_next_upstream off;
+
+            include /etc/nginx/sites-enabled/*;
+        }
+    kind: ConfigMap
+    metadata:
+      labels:
+        app: conjur-oss
+        app.kubernetes.io/component: service
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-nginx-configmap
+      namespace: NAMESPACE
+  3: |
+    apiVersion: v1
+    data:
+      key: YXV0aG4=
+    kind: Secret
+    metadata:
+      labels:
+        app: conjur-oss
+        app.kubernetes.io/component: service
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-authenticators
+    type: Opaque
+  4: |
+    apiVersion: v1
+    data:
+      key: MTIzNDU2Nzg5MA==
+    kind: Secret
+    metadata:
+      annotations:
+        helm.sh/hook: pre-install
+        helm.sh/hook-delete-policy: before-hook-creation
+      labels:
+        app: conjur-oss
+        app.kubernetes.io/component: service
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-data-key
+    type: Opaque
+  5: |
+    apiVersion: v1
+    data:
+      key: cG9zdGdyZXM6Ly9wb3N0Z3JlczpwYXNzd29yZEBSRUxFQVNFLU5BTUUtcG9zdGdyZXMvcG9zdGdyZXM/c3NsbW9kZT1yZXF1aXJl
+    kind: Secret
+    metadata:
+      annotations:
+        helm.sh/hook: pre-install
+        helm.sh/hook-delete-policy: before-hook-creation
+      labels:
+        app: conjur-oss
+        app.kubernetes.io/component: service
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-database-url
+    type: Opaque
+  6: |
+    apiVersion: v1
+    data:
+      key: cGFzc3dvcmQ=
+    kind: Secret
+    metadata:
+      annotations:
+        helm.sh/hook: pre-install
+        helm.sh/hook-delete-policy: before-hook-creation
+      labels:
+        app: conjur-oss
+        app.kubernetes.io/component: service
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-database-password
+    type: Opaque
+  7: |
+    apiVersion: v1
+    data:
+      tls.crt: ZHVtbXlfY2VydAo=
+      tls.key: ZHVtbXlfa2V5Cg==
+    kind: Secret
+    metadata:
+      labels:
+        app: conjur-oss
+        app.kubernetes.io/component: service
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-database-ssl
+    type: kubernetes.io/tls
+  8: |
+    apiVersion: v1
+    data:
+      tls.crt: ZHVtbXlfY2FDZXJ0Cg==
+      tls.key: ZHVtbXlfY2FLZXkK
+    kind: Secret
+    metadata:
+      labels:
+        app: conjur-oss
+        app.kubernetes.io/component: ssl-cert
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-ssl-ca-cert
+    type: kubernetes.io/tls
+  9: |
+    apiVersion: v1
+    data:
+      tls.crt: ZHVtbXlfY2VydAo=
+      tls.key: ZHVtbXlfa2V5Cg==
+    kind: Secret
+    metadata:
+      labels:
+        app: conjur-oss
+        app.kubernetes.io/component: ssl-cert
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-ssl-cert
+    type: kubernetes.io/tls

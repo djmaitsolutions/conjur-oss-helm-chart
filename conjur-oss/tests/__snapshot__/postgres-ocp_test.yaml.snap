@@ -1,0 +1,114 @@
+should match snapshot of default values:
+  1: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        template.openshift.io/expose-uri: postgres://{.spec.clusterIP}:{.spec.ports[?(.name=="postgresql")].port}
+      labels:
+        app: conjur-oss-postgres
+        app.kubernetes.io/component: postgres
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-postgres
+    spec:
+      ports:
+        - name: postgresql
+          port: 5432
+          protocol: TCP
+          targetPort: 5432
+      selector:
+        app: conjur-oss-postgres
+        app.kubernetes.io/component: postgres
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+  2: |
+    apiVersion: apps/v1
+    kind: StatefulSet
+    metadata:
+      labels:
+        app: conjur-oss-postgres
+        app.kubernetes.io/component: postgres
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-postgres
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: conjur-oss-postgres
+          app.kubernetes.io/component: postgres
+          app.kubernetes.io/name: RELEASE-NAME
+          chart: conjur-oss-0.0.0-dev
+          heritage: Helm
+          release: RELEASE-NAME
+      serviceName: RELEASE-NAME-postgres
+      template:
+        metadata:
+          labels:
+            app: conjur-oss-postgres
+            app.kubernetes.io/component: postgres
+            app.kubernetes.io/name: RELEASE-NAME
+            chart: conjur-oss-0.0.0-dev
+            heritage: Helm
+            release: RELEASE-NAME
+        spec:
+          containers:
+            - env:
+                - name: POSTGRESQL_ADMIN_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: key
+                      name: RELEASE-NAME-conjur-database-password
+              image: postgres:15.4
+              imagePullPolicy: IfNotPresent
+              livenessProbe:
+                exec:
+                  command:
+                    - /usr/libexec/check-container
+                    - --live
+                initialDelaySeconds: 120
+                timeoutSeconds: 10
+              name: postgresql
+              ports:
+                - containerPort: 5432
+                  protocol: TCP
+              readinessProbe:
+                exec:
+                  command:
+                    - /usr/libexec/check-container
+                initialDelaySeconds: 5
+                timeoutSeconds: 1
+              securityContext:
+                capabilities: {}
+                privileged: false
+              terminationMessagePath: /dev/termination-log
+              volumeMounts:
+                - mountPath: /var/lib/pgsql/data
+                  name: postgresql-data
+                - mountPath: /opt/app-root/src/certificates
+                  name: ssl-certs
+                  readOnly: true
+                - mountPath: /opt/app-root/src/postgresql-cfg
+                  name: RELEASE-NAME-conjur-postgres-configmap-volume
+                  readOnly: true
+          volumes:
+            - name: postgresql-data
+              persistentVolumeClaim:
+                claimName: RELEASE-NAME-conjur-oss-pvc
+            - name: ssl-certs
+              secret:
+                defaultMode: 384
+                secretName: RELEASE-NAME-conjur-database-ssl
+            - configMap:
+                items:
+                  - key: postgres_ssl
+                    path: postgres-ssl.conf
+                name: RELEASE-NAME-conjur-postgres-configmap
+              name: RELEASE-NAME-conjur-postgres-configmap-volume

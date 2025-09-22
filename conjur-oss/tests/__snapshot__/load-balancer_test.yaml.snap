@@ -1,0 +1,29 @@
+should match snapshot of default values:
+  1: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
+      labels:
+        app: conjur-oss
+        app.kubernetes.io/component: service
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-oss-ingress
+    spec:
+      ports:
+        - name: https
+          port: 443
+          protocol: TCP
+          targetPort: https
+      selector:
+        app: conjur-oss
+        app.kubernetes.io/component: service
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      type: LoadBalancer
