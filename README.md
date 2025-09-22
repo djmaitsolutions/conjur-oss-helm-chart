@@ -35,6 +35,18 @@ if you would like to contribute.
 
 ## Testing
 
+There is a complete set of unit tests for the chart which are executed using [Helm unittest plugin](https://github.com/helm-unittest/helm-unittest/tree/main). For example:
+
+```bash
+helm unittest conjur-os
+```
+
+As snapshots of the default rendered templates are used for many of the tests, if you make template changes that affect the defaults you will need to update the snapshots like so:
+
+```bash
+helm unittest conjur-os -u
+```
+
 This repository includes basic smoke testing on GKE. The Conjur OSS Helm Chart is also exercised more thoroughly by the [cyberark/conjur-authn-k8s-client](https://github.com/cyberark/conjur-authn-k8s-client) project, which clones the OSS Helm Chart repo and uses it while testing across several versions of Kubernetes and OpenShift.
 
 ## License
