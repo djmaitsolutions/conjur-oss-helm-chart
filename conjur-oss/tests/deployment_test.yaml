@@ -13,13 +13,13 @@ tests:
         ssl:
           # Dummy base64-encoded cert and key values
           cert: ZHVtbXlfY2VydAo=
-          key: ZHVtbXlfa2V5Cg==
+          key: ZHVtbXlfa2V5Cg== #gitleaks:allow
       # Dummy base64-encoded cert and key values
       ssl:
         caCert: ZHVtbXlfY2FDZXJ0Cg==
-        caKey: ZHVtbXlfY2FLZXkK
+        caKey: ZHVtbXlfY2FLZXkK #gitleaks:allow
         cert: ZHVtbXlfY2VydAo=
-        key: ZHVtbXlfa2V5Cg==
+        key: ZHVtbXlfa2V5Cg== #gitleaks:allow
     asserts:
       - matchSnapshot: {}
   - it: should have additional volumes if exportAPIkey is enabled

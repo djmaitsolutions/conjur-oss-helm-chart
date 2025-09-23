@@ -13,7 +13,7 @@ tests:
         ssl:
           # Dummy base64-encoded cert and key values
           cert: ZHVtbXlfY2VydAo=
-          key: ZHVtbXlfa2V5Cg==        
+          key: ZHVtbXlfa2V5Cg== #gitleaks:allow
     asserts:
       - matchSnapshot: {}
   - it: should not create the non Openshift enabled Postgres manifests if 'openshift.enabled' is true
