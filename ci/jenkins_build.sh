@@ -17,9 +17,9 @@ source ../utils.sh
 #   HELM_TEST_LOGGING:    Set to true to enable Helm test log collection.
 #                         Defaults to false.
 #   HELM_VERSION:         Helm client version to use for the test.
-#                         Defaults to '3.1.3'.
+#                         Defaults to '3.19.0'.
 #   KUBECTL_VERSION:      Kubectl client version to use for the test.
-#                         Defaults to '1.16.9'.
+#                         Defaults to latest stable release.
 #   SKIP_GCLOUD_LOGIN:    If set to 'true', then skip Gcloud authentication.
 #                         This is useful for local testing whereby you've
 #                         already authenticated with GCP and/or have 'kubectl'
@@ -28,12 +28,13 @@ source ../utils.sh
 #                         authn-k8s, defaults to authn-k8s
 
 test_id="$(random_string)"
+kubectl_curr_ver=$(curl -L -s https://dl.k8s.io/release/stable.txt)
 
 export CONJUR_NAMESPACE="${CONJUR_NAMESPACE:-conjur-oss-test-$test_id}"
 export HELM_INSTALL_TIMEOUT="${HELM_INSTALL_TIMEOUT:-180}"
 export HELM_TEST_LOGGING="${HELM_TEST_LOGGING:-true}"
-export HELM_VERSION="${HELM_VERSION:-3.1.3}"
-export KUBECTL_VERSION="${KUBECTL_VERSION:-1.16.9}"
+export HELM_VERSION="${HELM_VERSION:-3.19.0}"
+export KUBECTL_VERSION="${KUBECTL_VERSION:-$kubectl_curr_ver}"
 export RELEASE_NAME="$CONJUR_NAMESPACE"
 export SKIP_GCLOUD_LOGIN="${SKIP_GCLOUD_LOGIN:-false}"
 export AUTHN_STRATEGY="${AUTHN_STRATEGY:-authn-k8s}"
@@ -130,8 +131,15 @@ else
   helm init --upgrade
 fi
 
-announce "Deploying and testing Conjur OSS"
 cd ..
+announce "Running Helm unit tests..."
+helm unittest conjur-oss
+if [ $? -ne 0 ]; then
+  announce "Helm unit tests failed"
+  exit 1
+fi
+
+announce "Deploying and testing Conjur OSS"
 trap delete_namespace EXIT
 if ! ./test.sh; then
   announce "                 FAILED"

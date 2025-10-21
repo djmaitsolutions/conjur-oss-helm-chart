@@ -32,6 +32,9 @@ RUN wget https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz && \
     rm helm-v${HELM_VERSION}-linux-amd64.tar.gz && \
     rm -rf linux-amd64
 
+# Install Helm unittest plugin
+RUN helm plugin install https://github.com/helm-unittest/helm-unittest.git
+
 # Install Kubernetes client
-RUN wget -O /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl && \
+RUN wget -LO /usr/local/bin/kubectl https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl && \
     chmod +x /usr/local/bin/kubectl
