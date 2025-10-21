@@ -133,7 +133,7 @@ fi
 
 cd ..
 announce "Running Helm unit tests..."
-helm unittest conjur-oss
+helm unittest conjur-oss -v conjur-oss/unittest-values.yaml
 if [ $? -ne 0 ]; then
   announce "Helm unit tests failed"
   exit 1

@@ -38,13 +38,13 @@ if you would like to contribute.
 There is a complete set of unit tests for the chart which are executed using [Helm unittest plugin](https://github.com/helm-unittest/helm-unittest/tree/main) from this root folder. For example:
 
 ```bash
-helm unittest conjur-oss
+helm unittest conjur-oss -v conjur-oss/unittest-values.yaml
 ```
 
 As snapshots of the default rendered templates are used for many of the tests, if you make template changes that affect the defaults you will need to update the snapshots like so:
 
 ```bash
-helm unittest conjur-oss -u
+helm unittest conjur-oss -u -v conjur-oss/unittest-values.yaml
 ```
 
 _NOTE:_ if you do update the snapshot files you will need to also add the commit fingerprint to the `.gitleaksignore` file to prevent a Gitleaks security scan error.
