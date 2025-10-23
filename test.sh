@@ -79,13 +79,13 @@ function dump_debug_info() {
   kubectl get all -n "$CONJUR_NAMESPACE"
 
   announce "Showing Conjur OSS Server logs"
-  kubectl logs -l "app=conjur-oss" -c conjur-oss
+  kubectl logs -l "app=conjur-oss" -c conjur-oss -n "$CONJUR_NAMESPACE"
 
   announce "Showing Conjur OSS NGINX logs"
-  kubectl logs -l "app=conjur-oss" -c "$RELEASE_NAME"-nginx
+  kubectl logs -l "app=conjur-oss" -c "$RELEASE_NAME"-nginx -n "$CONJUR_NAMESPACE"
 
   announce "Showing Postgres logs"
-  kubectl logs -l "app=conjur-oss-postgres"
+  kubectl logs -l "app=conjur-oss-postgres" -n "$CONJUR_NAMESPACE"
 
   announce "Showing Kubernetes nodes"
   kubectl describe nodes
