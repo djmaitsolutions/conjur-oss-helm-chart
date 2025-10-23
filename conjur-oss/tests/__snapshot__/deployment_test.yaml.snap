@@ -36,7 +36,7 @@ should match snapshot of default values:
             release: RELEASE-NAME
         spec:
           containers:
-            - image: nginx:1.15
+            - image: nginx:1.29
               imagePullPolicy: Always
               livenessProbe:
                 failureThreshold: 180

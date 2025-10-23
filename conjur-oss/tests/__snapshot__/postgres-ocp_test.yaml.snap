@@ -66,7 +66,7 @@ should match snapshot of default values:
                     secretKeyRef:
                       key: key
                       name: RELEASE-NAME-conjur-database-password
-              image: postgres:15.4
+              image: postgres:17
               imagePullPolicy: IfNotPresent
               livenessProbe:
                 exec:
