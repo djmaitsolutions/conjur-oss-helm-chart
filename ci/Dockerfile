@@ -17,7 +17,7 @@ RUN apt-get update && \
                        wget && \
     distro="$(. /etc/os-release; echo $ID)" && \
     release="$(lsb_release -cs)" && \
-    curl -fsSL "https://download.docker.com/linux/$distro/gpg" > /tmp/docker_repo_key && \
+    wget -q -O /tmp/docker_repo_key "https://download.docker.com/linux/$distro/gpg" && \
     apt-key add /tmp/docker_repo_key && \
     add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$distro $release stable" && \
     apt-get update && \
