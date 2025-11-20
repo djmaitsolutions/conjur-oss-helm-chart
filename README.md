@@ -46,8 +46,6 @@ As snapshots of the default rendered templates are used for many of the tests, i
 ```bash
 helm unittest conjur-oss -u -v conjur-oss/unittest-values.yaml
 ```
-
-_NOTE:_ if you do update the snapshot files you will need to also add the commit fingerprint to the `.gitleaksignore` file to prevent a Gitleaks security scan error.
  
 This repository includes basic smoke testing on GKE. The Conjur OSS Helm Chart is also exercised more thoroughly by the [cyberark/conjur-authn-k8s-client](https://github.com/cyberark/conjur-authn-k8s-client) project, which clones the OSS Helm Chart repo and uses it while testing across several versions of Kubernetes and OpenShift.
 
