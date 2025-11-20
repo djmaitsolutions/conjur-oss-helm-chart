@@ -75,16 +75,16 @@
 
   Start a container with Conjur CLI and authenticate with the new user:
 
-      docker run --rm -it --entrypoint bash cyberark/conjur-cli:8
-      # Or if using MiniKube, use the following command from the host:
-      # docker run --rm -it --network host --entrypoint bash cyberark/conjur-cli:8
+      docker run --rm -it --entrypoint bash cyberark/conjur-cli:9
+      # Or if using MiniKube/KinD/Docker Desktop, use the following command from the host:
+      # docker run --rm -it --add-host conjur.myorg.com:host-gateway --entrypoint bash cyberark/conjur-cli:9
 
       # Here ENDPOINT is the DNS name https endpoint for your Conjur service.
       # NOTE: Ensure that the target endpoint matches at least one of the expected server
       #       SSL certificate names otherwise SSL verification will fail and you will not
       #       be able to log in.
       # NOTE: Also ensure that the URL does not contain a slash (`/`) at the end of the URL
-      conjur init -u <ENDPOINT> -a {{ .Values.account.name | quote }} --self-signed
+      conjur init oss -u <ENDPOINT> -a {{ .Values.account.name | quote }} --self-signed
 
       # API key here is the key that creation of the account provided you in step #2
       conjur login -i admin -p <API_KEY>

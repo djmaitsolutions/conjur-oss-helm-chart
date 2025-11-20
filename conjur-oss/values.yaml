@@ -84,13 +84,13 @@ nginx:
 
   # If you do want to specify resources, uncomment the following lines, adjust
   # them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
   resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
       
 # nodeSelector (node selection constraints) to apply to the Conjur pod. Refer to:
 # https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
@@ -101,10 +101,10 @@ postgres:
     # NOTE: For OpenShift deployments, the default values to use for the
     # postgres image are as follows:
     #
-    # repository: registry.redhat.io/rhscl/postgresql-10-rhel7
+    # repository: registry.redhat.io/rhel8/postgresql-15
     # tag: latest
     repository: postgres       # https://hub.docker.com/_/postgres/
-    tag: '17'
+    tag: '15'
     pullPolicy: Always
       
   persistentVolume:
@@ -115,13 +115,13 @@ postgres:
 
   # If you do want to specify resources, uncomment the following lines, adjust
   # them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
-  # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
   resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
 
 # Additional labels to apply to all postgres-related resources
 postgresLabels: {}
@@ -153,13 +153,13 @@ replicaCount: 1
 # 
 # If you do want to specify resources, uncomment the following lines, adjust
 # them as necessary, and remove the curly braces after 'resources:'.
-# limits:
-#  cpu: 100m
-#  memory: 128Mi
-# requests:
-#  cpu: 100m
-#  memory: 128Mi
 resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
 
 service:
   external:

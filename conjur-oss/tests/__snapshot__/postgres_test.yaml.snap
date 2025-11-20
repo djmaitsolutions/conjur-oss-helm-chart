@@ -74,7 +74,7 @@ should match snapshot of default values:
                       name: RELEASE-NAME-conjur-database-password
                 - name: PGDATA
                   value: /var/lib/postgresql/data/pgdata
-              image: postgres:17
+              image: postgres:15
               imagePullPolicy: Always
               name: postgres
               volumeMounts:

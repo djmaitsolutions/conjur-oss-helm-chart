@@ -2,8 +2,6 @@
 
 set -eo pipefail
 
-source ../is-helm-v2.sh
-
 if [ "$(which jq)" == "" ]; then
   echo "ERROR: Could not find jq utility!"
   exit 1
@@ -22,9 +20,6 @@ fi
 
 for conjur_release in ${conjur_releases}; do
   echo "Deleting Conjur release '${conjur_release}'..."
-  if is_helm_v2; then
-    helm_del_args="$helm_del_args --purge"
-  fi
   if [ ! -z "$CONJUR_NAMESPACE" ]; then
     helm_del_args="$helm_del_args -n $CONJUR_NAMESPACE"
   fi
