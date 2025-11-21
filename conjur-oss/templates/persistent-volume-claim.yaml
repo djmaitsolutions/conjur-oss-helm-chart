@@ -4,12 +4,12 @@ kind: PersistentVolumeClaim
 metadata:
   name: {{ .Release.Name }}-conjur-oss-pvc
   labels:
-    app: {{ template "conjur-oss.name" . }}
+    app: {{ template "conjur-oss.name" . }}-postgres
     chart: {{ template "conjur-oss.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     app.kubernetes.io/name: {{ .Release.Name }}
-    app.kubernetes.io/component: pvc
+    app.kubernetes.io/component: postgres
 {{- with .Values.conjurLabels }}
 {{ toYaml . | indent 4 }}
 {{- end }}

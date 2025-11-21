@@ -1,0 +1,57 @@
+suite: Test Postgres manifests when Openshift not enabled
+templates:
+  - "postgres.yaml"
+  - "secrets.yaml"
+tests:
+  - it: should match snapshot of default values
+    set:
+      dataKey: "1234567890"
+      openshift:
+        enabled: false
+      database:
+        password: "password"
+        ssl:
+          # Dummy base64-encoded cert and key values
+          cert: ZHVtbXlfY2VydAo=
+          key: ZHVtbXlfa2V5Cg== #gitleaks:allow
+    asserts:
+      - matchSnapshot: {}
+  - it: should not create the non Openshift enabled Postgres manifests if 'openshift.enabled' is true
+    set:
+      dataKey: "1234567890"
+      openshift:
+        enabled: true
+    asserts:
+      - notExists:
+          path: spec.template.spec.containers
+  - it: should not mount a PVC if 'postgres.persistentVolume.create' is false
+    set:
+      dataKey: "1234567890"
+      postgres:
+        persistentVolume:
+          create: false
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content: 
+            name: postgres-data
+          any: true
+      - notContains:
+          path: spec.template.spec.volumes
+          content:
+            name: postgres-data
+  - it: should include resources if specified
+    set:
+      dataKey: "1234567890"
+      postgres:
+        resources:
+          requests:
+            cpu: "100m"
+    template: "postgres.yaml"
+    documentSelector:
+      path: kind
+      value: StatefulSet
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].resources.requests.cpu
+          value: "100m"

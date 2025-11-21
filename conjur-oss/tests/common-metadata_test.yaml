@@ -1,0 +1,78 @@
+suite: Test all resources contain metadata
+templates:
+  - "*.yaml"
+release:
+  name: conjur-oss
+tests:
+  - it: "should contain labels metadata in each default template"
+    set:
+      dataKey: "1234567890"
+      exportAPIkey:
+        enabled: true
+    templates:
+      - "auth-role.yaml"
+      - "deployment.yaml"
+      - "exportapikey-configmap.yaml"
+      - "load-balancer.yaml"
+      - "nginx-configmap.yaml"
+      - "secrets.yaml"
+      - "service.yaml"
+      - "ssl-cert.yaml"
+    asserts:
+      - exists:
+          path: metadata.labels
+      - isNotEmpty:
+          path: metadata.labels
+      - isSubset:
+          path: metadata.labels
+          content:
+            app: conjur-oss
+            chart: conjur-oss-0.0.0-dev
+            app.kubernetes.io/name: conjur-oss
+            heritage: Helm
+            release: conjur-oss
+  - it: "should contain labels metadata in postgres template"
+    set:
+      dataKey: "1234567890"
+      postgres:
+        persistentVolume:
+          create: true
+    templates:
+      - "postgres.yaml"
+      - "persistent-volume-claim.yaml"
+    asserts:
+      - exists:
+          path: metadata.labels
+      - isNotEmpty:
+          path: metadata.labels
+      - isSubset:
+          path: metadata.labels
+          content:
+            app: conjur-oss-postgres
+            chart: conjur-oss-0.0.0-dev
+            app.kubernetes.io/name: conjur-oss
+            app.kubernetes.io/component: postgres
+            heritage: Helm
+            release: conjur-oss
+  - it: "should contain labels metadata in postgres-ocp templates"
+    set:
+      dataKey: "1234567890"
+      openshift:
+        enabled: true
+    templates:
+      - "postgres-ocp.yaml"
+      - "postgres-ocp-ssl-configmap.yaml"
+    asserts:
+      - exists:
+          path: metadata.labels
+      - isNotEmpty:
+          path: metadata.labels
+      - isSubset:
+          path: metadata.labels
+          content:
+            app: conjur-oss-postgres
+            chart: conjur-oss-0.0.0-dev
+            app.kubernetes.io/name: conjur-oss
+            app.kubernetes.io/component: postgres
+            heritage: Helm
+            release: conjur-oss            

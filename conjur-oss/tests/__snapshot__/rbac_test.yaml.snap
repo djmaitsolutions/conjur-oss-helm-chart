@@ -1,0 +1,75 @@
+should match snapshot of default values:
+  1: |
+    apiVersion: v1
+    kind: ServiceAccount
+    metadata:
+      labels:
+        app: conjur-oss
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-oss
+  2: |
+    apiVersion: rbac.authorization.k8s.io/v1alpha1
+    kind: ClusterRole
+    metadata:
+      labels:
+        app: conjur-oss
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-authenticator
+    rules:
+      - apiGroups:
+          - ""
+        resources:
+          - pods
+          - serviceaccounts
+        verbs:
+          - get
+          - list
+      - apiGroups:
+          - extensions
+        resources:
+          - deployments
+          - replicasets
+        verbs:
+          - get
+          - list
+      - apiGroups:
+          - apps
+        resources:
+          - deployments
+          - statefulsets
+          - replicasets
+        verbs:
+          - get
+          - list
+      - apiGroups:
+          - ""
+        resources:
+          - pods/exec
+        verbs:
+          - create
+          - get
+  3: |
+    apiVersion: rbac.authorization.k8s.io/v1alpha1
+    kind: ClusterRoleBinding
+    metadata:
+      labels:
+        app: conjur-oss
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-authenticator
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: ClusterRole
+      name: RELEASE-NAME-conjur-authenticator
+    subjects:
+      - kind: ServiceAccount
+        name: RELEASE-NAME-conjur-oss
+        namespace: NAMESPACE

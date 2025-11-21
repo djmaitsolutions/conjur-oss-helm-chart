@@ -1,0 +1,19 @@
+suite: Test ExportAPIKey ConfigMap
+templates:
+  - "exportapikey-configmap.yaml"
+tests:
+  - it: should match snapshot of default values
+    set:
+      dataKey: "1234567890"
+      exportAPIkey:
+        enabled: true
+    asserts:
+      - matchSnapshot: {}
+  - it: should not create the ExportAPIKey ConfigMap if exportAPIkey isn't enabled
+    set:
+      dataKey: "1234567890"
+      exportAPIkey:
+        enabled: false
+    asserts:
+      - notExists:
+          path: metadata.name        

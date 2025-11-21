@@ -5,9 +5,12 @@ metadata:
   name: {{ .Release.Name }}-conjur-postgres-configmap
   namespace: {{ .Release.Namespace }}
   labels:
+    app: {{ template "conjur-oss.name" . }}-postgres
     chart: {{ template "conjur-oss.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/component: postgres
 data:
   postgres_ssl: {{ tpl (.Files.Get "files/postgres-ssl.conf") . | quote }}
 {{- end -}}

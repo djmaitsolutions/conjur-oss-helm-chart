@@ -1,0 +1,21 @@
+should match snapshot of default values:
+  1: |
+    apiVersion: v1
+    data:
+      postgres_ssl: |
+        ssl = on
+        ssl_cert_file = '/opt/app-root/src/certificates/tls.crt'
+        ssl_key_file = '/opt/app-root/src/certificates/tls.key'
+        #ssl_ca_file = '/opt/app-root/src/certificates/ca.crt'
+        #ssl_crl_file = '/opt/app-root/src/certificates/list.crl'
+    kind: ConfigMap
+    metadata:
+      labels:
+        app: conjur-oss-postgres
+        app.kubernetes.io/component: postgres
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-postgres-configmap
+      namespace: NAMESPACE

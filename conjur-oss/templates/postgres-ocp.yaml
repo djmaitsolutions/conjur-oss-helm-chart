@@ -11,6 +11,8 @@ metadata:
     chart: {{ template "conjur-oss.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/component: postgres
 {{- with .Values.postgresLabels }}
 {{ toYaml . | indent 4 }}
 {{- end }}
@@ -31,6 +33,8 @@ metadata:
     chart: {{ template "conjur-oss.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/component: postgres
 {{- with .Values.postgresLabels }}
 {{ toYaml . | indent 4 }}
 {{- end }}
@@ -84,6 +88,9 @@ spec:
         - name: {{ .Release.Name }}-conjur-postgres-configmap-volume
           mountPath: /opt/app-root/src/postgresql-cfg
           readOnly: true
+        {{- if .Values.postgres.resources }}
+        resources: {{- toYaml .Values.postgres.resources | nindent 10 }}
+        {{- end }}          
       volumes:
       {{ if .Values.postgres.persistentVolume.create }}
       - name: postgresql-data

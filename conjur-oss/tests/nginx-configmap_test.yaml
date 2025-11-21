@@ -1,0 +1,12 @@
+suite: Test nginx ConfigMap
+templates:
+  - "nginx-configmap.yaml"
+tests:
+  - it: should not create any ConfigMap if 'openshift.enabled' is true
+    set:
+      dataKey: "1234567890"
+      openshift:
+        enabled: true
+    asserts:
+      - notExists:
+          path: metadata.name

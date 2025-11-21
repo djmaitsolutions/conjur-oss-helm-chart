@@ -1,0 +1,180 @@
+should match snapshot of default values:
+  1: |
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        app: conjur-oss-postgres
+        app.kubernetes.io/component: postgres
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-postgres
+    spec:
+      ports:
+        - port: 5432
+      selector:
+        app: conjur-oss-postgres
+        app.kubernetes.io/component: postgres
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+  2: |
+    apiVersion: apps/v1
+    kind: StatefulSet
+    metadata:
+      labels:
+        app: conjur-oss-postgres
+        app.kubernetes.io/component: postgres
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-postgres
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: conjur-oss-postgres
+          app.kubernetes.io/component: postgres
+          app.kubernetes.io/name: RELEASE-NAME
+          chart: conjur-oss-0.0.0-dev
+          heritage: Helm
+          release: RELEASE-NAME
+      serviceName: RELEASE-NAME-postgres
+      template:
+        metadata:
+          annotations:
+            checksum/secrets: 925d0f84d9884b70c7e952ae8d439e12bdb2ee6292adc0d2b273ec99360b2c97
+          labels:
+            app: conjur-oss-postgres
+            app.kubernetes.io/component: postgres
+            app.kubernetes.io/name: RELEASE-NAME
+            chart: conjur-oss-0.0.0-dev
+            heritage: Helm
+            release: RELEASE-NAME
+        spec:
+          containers:
+            - args:
+                - -c
+                - ssl=on
+                - -c
+                - ssl_cert_file=/etc/certs/tls.crt
+                - -c
+                - ssl_key_file=/etc/certs/tls.key
+              env:
+                - name: POSTGRES_HOST_AUTH_METHOD
+                  value: password
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: key
+                      name: RELEASE-NAME-conjur-database-password
+                - name: PGDATA
+                  value: /var/lib/postgresql/data/pgdata
+              image: postgres:15
+              imagePullPolicy: Always
+              name: postgres
+              volumeMounts:
+                - mountPath: /var/lib/postgresql/data
+                  name: postgres-data
+                - mountPath: /etc/certs
+                  name: ssl-certs
+                  readOnly: true
+          securityContext:
+            fsGroup: 999
+          volumes:
+            - name: postgres-data
+              persistentVolumeClaim:
+                claimName: RELEASE-NAME-conjur-oss-pvc
+            - name: ssl-certs
+              secret:
+                defaultMode: 384
+                secretName: RELEASE-NAME-conjur-database-ssl
+  3: |
+    apiVersion: v1
+    data:
+      key: YXV0aG4=
+    kind: Secret
+    metadata:
+      labels:
+        app: conjur-oss
+        app.kubernetes.io/component: service
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-authenticators
+    type: Opaque
+  4: |
+    apiVersion: v1
+    data:
+      key: MTIzNDU2Nzg5MA==
+    kind: Secret
+    metadata:
+      annotations:
+        helm.sh/hook: pre-install
+        helm.sh/hook-delete-policy: before-hook-creation
+      labels:
+        app: conjur-oss
+        app.kubernetes.io/component: service
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-data-key
+    type: Opaque
+  5: |
+    apiVersion: v1
+    data:
+      key: cG9zdGdyZXM6Ly9wb3N0Z3JlczpwYXNzd29yZEBSRUxFQVNFLU5BTUUtcG9zdGdyZXMvcG9zdGdyZXM/c3NsbW9kZT1yZXF1aXJl
+    kind: Secret
+    metadata:
+      annotations:
+        helm.sh/hook: pre-install
+        helm.sh/hook-delete-policy: before-hook-creation
+      labels:
+        app: conjur-oss
+        app.kubernetes.io/component: service
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-database-url
+    type: Opaque
+  6: |
+    apiVersion: v1
+    data:
+      key: cGFzc3dvcmQ=
+    kind: Secret
+    metadata:
+      annotations:
+        helm.sh/hook: pre-install
+        helm.sh/hook-delete-policy: before-hook-creation
+      labels:
+        app: conjur-oss
+        app.kubernetes.io/component: service
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-database-password
+    type: Opaque
+  7: |
+    apiVersion: v1
+    data:
+      tls.crt: ZHVtbXlfY2VydAo=
+      tls.key: ZHVtbXlfa2V5Cg==
+    kind: Secret
+    metadata:
+      labels:
+        app: conjur-oss
+        app.kubernetes.io/component: service
+        app.kubernetes.io/name: RELEASE-NAME
+        chart: conjur-oss-0.0.0-dev
+        heritage: Helm
+        release: RELEASE-NAME
+      name: RELEASE-NAME-conjur-database-ssl
+    type: kubernetes.io/tls

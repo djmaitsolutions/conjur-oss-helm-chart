@@ -5,9 +5,12 @@ metadata:
   name: {{ .Release.Name }}-conjur-nginx-configmap
   namespace: {{ .Release.Namespace }}
   labels:
+    app: {{ template "conjur-oss.name" . }}
     chart: {{ template "conjur-oss.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/component: service
 data:
   nginx_conf: {{ tpl (.Files.Get "files/nginx.conf") . | quote }}
   mime_types: {{ tpl (.Files.Get "files/mime.types") . | quote }}

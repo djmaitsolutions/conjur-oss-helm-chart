@@ -69,6 +69,9 @@ spec:
         - name: ssl-certs
           mountPath: "/etc/certs"
           readOnly: true
+        {{- if .Values.postgres.resources }}
+        resources: {{- toYaml .Values.postgres.resources | nindent 10 }}
+        {{- end }}
       volumes:
 {{ if .Values.postgres.persistentVolume.create }}
       - name: postgres-data

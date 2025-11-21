@@ -1,0 +1,27 @@
+suite: Test RBAC
+templates:
+  - auth-role.yaml
+tests:
+  - it: should match snapshot of default values
+    set:
+      dataKey: "1234567890"
+    templates:
+      - auth-role.yaml
+    asserts:
+      - matchSnapshot: {}
+  - it: should create an additional RBAC rule if exportAPIkey is enabled
+    set:
+      dataKey: "1234567890"
+      exportAPIkey:
+        enabled: true
+    template: auth-role.yaml
+    documentSelector:
+      path: kind
+      value: ClusterRole
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups: [""]
+            resources: ["secrets"]
+            verbs: ["create", "delete", "update", "get", "list"]
